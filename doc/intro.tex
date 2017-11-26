@@ -1,0 +1,61 @@
+\setuplayout[topspace=0.5in, backspace=0.5in, header=24pt, footer=36pt,
+  height=middle, width=middle]
+\setupfooter[style=\it]
+\setupfootertexts[\hfill https://github.com/Jabberwockleo]
+\setuppagenumbering[location={header,right}]
+\setupbodyfont[11pt]
+
+\starttext
+
+\title{RankNet}
+Ranking problems are essentially much weaker problems than classification problems or ordinal regression problems -- it concerns only about the order of the inputs, not the value associated with them (if any values were produced by some underlined proxy method).
+
+
+RankNet [Burges, C., et al., 2005] models pair-wise rankings with probability. It avoids using complete ranking of the training data ($C_n^2 \text{,    i.e. } O(n^2)$ labels) to form a complete graph, by using a transductive representation instead to reduce the required labels to $O(n)$. The probabilistic model also deals with inconsistent data pairs nicely.
+
+\subject{Model}
+The target function $f(x)$ is a mapping $f: R^d \rightarrow R$, which takes a query-document feature vector as input, and the relative ranking of a pair ${x_1, x_2}$ is specified by
+\startformula
+f(x_1) > f(x_2) \Rightarrow x_1 \rhd x_2
+\stopformula
+Denote the modeled posterior $P(x_i \rhd x_j)$ by $P_{ij}$, and $\bar{P}_{ij}$ is the desired value of the posterior.
+
+Define
+\startformula
+o_i \equiv f(x_i)
+\stopformula
+\startformula
+o_{ij} \equiv f(x_i) - f(x_j)
+\stopformula
+The posterior is modeled (the core of RankNet) by
+\startformula
+P_{ij} = \frac{e^{o_{ij}}}{1 + e^{o_{ij}}}
+\stopformula
+Which has a nice consistent transductive property
+\startformula
+\bar{P}_{ij} = \frac{\bar{P}_{ik}\bar{P}_{kj}}{1 + 2\bar{P}_{ik}\bar{P}_{kj} - (\bar{P}_{ik} + \bar{P}_{kj})}
+\stopformula
+for example,
+\startformula
+\bar{P}_{ik} = \bar{P}_{kj} = 0.5 \Rightarrow \bar{P}_{ij} = 0.5 \text{    (completely uncertain)}
+\stopformula
+\startformula
+\bar{P}_{ik} = \bar{P}_{kj} = 0 \Rightarrow \bar{P}_{ij} = 0 \text{    (completely certain)}
+\stopformula
+\startformula
+\bar{P}_{ik} = \bar{P}_{kj} = 1 \Rightarrow \bar{P}_{ij} = 1 \text{    (completely certain)}
+\stopformula
+The proof of uniqueness of pair-wise ranking by $O(n)$ labels and monotonicity if $f(x)$ is omitted here.
+
+
+\subject{Strategy}
+The cost function is the KL-divergence
+\startformula
+C_{ij} \equiv C(o_{ij}) = - \bar{P}_{ij} \log P_{ij} - (1 - \bar{P}_{ij})\log (1 - P_{ij})
+\stopformula
+Subtracting $P_{ij}$,
+\startformula
+C_{ij} = - \bar{P}_{ij}o_{ij} + \log(1 + e^{o_{ij}})
+\stopformula
+
+\stoptext
