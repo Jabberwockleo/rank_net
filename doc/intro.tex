@@ -48,6 +48,11 @@ for example,
 The proof of uniqueness of pair-wise ranking by $O(n)$ labels and monotonicity if $f(x)$ is omitted here.
 
 
+It's proven that -- Every bounded continuous function can be approximated with arbitrarily small error, by network with one hidden layer [Cybenko 1989; Hornik et al. 1989], and any function can be approximated to arbitrary accuracy by a network with two hidden layers [Cybenko 1988]. 
+
+
+RankNet models the function $f(x)$ with a 2-layered MLP, with one hidden layer and a output layer. Or simply a linear net.
+
 \subject{Strategy}
 The cost function is the KL-divergence
 \startformula
@@ -57,5 +62,9 @@ Subtracting $P_{ij}$,
 \startformula
 C_{ij} = - \bar{P}_{ij}o_{ij} + \log(1 + e^{o_{ij}})
 \stopformula
+
+
+\subject{Algorithm}
+We can optimize the total loss of pairs of juxtaposition (i.e. $C_{12} + C_{23} + C_{34} ...$)  using gradient descent.
 
 \stoptext
