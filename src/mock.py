@@ -16,7 +16,7 @@ import random
 import numpy as np
 import config
 
-def get_train_data(batch_size = 32):
+def get_train_data(batch_size = 100):
     X1, X2 = [],[]
     Y1, Y2 = [],[]
     for i in range(0, batch_size):

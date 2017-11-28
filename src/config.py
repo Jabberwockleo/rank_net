@@ -16,3 +16,4 @@ USE_HIDDEN_LAYER = True
 LAYER_WIDTH = 10
 FEATURE_NUM = 5
 LEARNING_RATE = 0.01
+MODEL_PATH = "./model_ranknet.ckpt"

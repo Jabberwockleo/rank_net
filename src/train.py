@@ -15,6 +15,9 @@ Date: 2017/11/27 10:41:01
 import tensorflow as tf
 import ranknet as rn
 import mock
+import config
+
+saver = tf.train.Saver()
 
 with tf.Session() as sess:
     init = tf.initialize_all_variables()
@@ -22,10 +25,12 @@ with tf.Session() as sess:
     for epoch in range(0,10000):
         X, Y = mock.get_train_data()
         sess.run(rn.train_op, feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
-        if epoch % 10 == 0 :
+        if epoch % 100 == 0 :
             l_v = sess.run(rn.loss, feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
             h_o12_v = sess.run(rn.o12, feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
             o12_v = sess.run(rn.O12, feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
             print "------ epoch[%d] loss_v[%f] ------ "%(epoch, l_v)
-            for k in range(0, len(o12_v)):
-                print "k[%d] o12_v[%f] h_o12_v[%f]"%(k, o12_v[k], h_o12_v[k])
+            #for k in range(0, len(o12_v)):
+            #    print "k[%d] o12_v[%f] h_o12_v[%f]"%(k, o12_v[k], h_o12_v[k])
+    save_path = saver.save(sess, config.MODEL_PATH)
+    print("Model saved in file: %s" % save_path)
