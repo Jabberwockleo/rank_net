@@ -21,12 +21,12 @@ import config
 saver = tf.train.Saver()
 
 with tf.Session() as sess:
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
     sess.run(init)
     saver.restore(sess, config.MODEL_PATH)
     print("Model restored from file: %s" % config.MODEL_PATH)
     for epoch in range(0,10):
-        X, Y = mock.get_train_data()
+        X, Y = mock.get_train_data(batch_size = 10000)
         o1, o2, O1, O2 = sess.run([rn.o1, rn.o2, rn.O1, rn.O2],
                 feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
         a = (o1 - o2)
