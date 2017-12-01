@@ -18,8 +18,14 @@ import ranknet as rn
 import mock
 import config
 
-saver = tf.train.Saver()
+fin = open(config.TEST_DATA, "w")
+mock.generate_labeled_data_file(fin, 100)
+fin.close()
+fout = open(config.TEST_DATA, "r")
+test_data = mock.parse_labeled_data_file(fout)
+fout.close()
 
+saver = tf.train.Saver()
 with tf.Session() as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -33,7 +39,7 @@ with tf.Session() as sess:
         b = (O1 - O2)
         s = np.sign(a * b)
         negative = (s.shape[0] - np.sum(s)) / 2
-        print "===== epoch [%d] accuracy [%d/%d = %f] =====" % (
+        print "===== epoch [%d] pairwise accuracy [%d/%d = %f] =====" % (
                 epoch,
                 (s.shape[0] - negative),
                 s.shape[0],
