@@ -27,25 +27,33 @@ biases = {
         "linear": tf.Variable(tf.random_normal([1]), name="b_linear"),
 }
 
-with tf.name_scope("input"):
-    X1 = tf.placeholder(tf.float32, [None, config.FEATURE_NUM], name="X1")
-    X2 = tf.placeholder(tf.float32, [None, config.FEATURE_NUM], name="X2")
-    O1 = tf.placeholder(tf.float32, [None, 1], name="O1")
-    O2 = tf.placeholder(tf.float32, [None, 1], name="O2")
+with tf.name_scope("mlp1"):
+    with tf.name_scope("input"):
+        X1 = tf.placeholder(tf.float32, [None, config.FEATURE_NUM], name="X1")
+        O1 = tf.placeholder(tf.float32, [None, 1], name="O1")
+    if config.USE_HIDDEN_LAYER == True:
+        with tf.name_scope("hidden_layer"):
+            layer_h1 = tf.add(tf.matmul(X1, weights["hidden"]), biases["hidden"])
+            layer_h1 = tf.nn.relu(layer_h1)
+        with tf.name_scope("out_layer"):
+            o1 = tf.add(tf.matmul(layer_h1, weights["out"]), biases["out"])
+    else:
+        with tf.name_scope("linear_layer"):
+            o1 = tf.add(tf.matmul(X1, weights["linear"]), biases["linear"])
 
-if config.USE_HIDDEN_LAYER == True:
-    with tf.name_scope("hidden_layer"):
-        layer_h1 = tf.add(tf.matmul(X1, weights["hidden"]), biases["hidden"])
-        layer_h1 = tf.nn.relu(layer_h1)
-        layer_h2 = tf.add(tf.matmul(X2, weights["hidden"]), biases["hidden"])
-        layer_h2 = tf.nn.relu(layer_h2)
-    with tf.name_scope("out_layer"):
-        o1 = tf.add(tf.matmul(layer_h1, weights["out"]), biases["out"])
-        o2 = tf.add(tf.matmul(layer_h2, weights["out"]), biases["out"])
-else:
-    with tf.name_scope("linear_layer"):
-        o1 = tf.add(tf.matmul(X1, weights["linear"]), biases["linear"])
-        o2 = tf.add(tf.matmul(X2, weights["linear"]), biases["linear"])
+with tf.name_scope("mlp2"):
+    with tf.name_scope("input"):
+        X2 = tf.placeholder(tf.float32, [None, config.FEATURE_NUM], name="X2")
+        O2 = tf.placeholder(tf.float32, [None, 1], name="O2")
+    if config.USE_HIDDEN_LAYER == True:
+        with tf.name_scope("hidden_layer"):
+            layer_h2 = tf.add(tf.matmul(X2, weights["hidden"]), biases["hidden"])
+            layer_h2 = tf.nn.relu(layer_h2)
+        with tf.name_scope("out_layer"):
+            o2 = tf.add(tf.matmul(layer_h2, weights["out"]), biases["out"])
+    else:
+        with tf.name_scope("linear_layer"):
+            o2 = tf.add(tf.matmul(X2, weights["linear"]), biases["linear"])
 
 with tf.name_scope("loss"):
     O12 = O1 - O2

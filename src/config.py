@@ -21,4 +21,5 @@ TRAIN_BATCH_SIZE = 20
 MODEL_PATH = "./model_ranknet.ckpt"
 TRAIN_DATA = "./train.data"
 TEST_DATA = "./test.data"
+PREDICT_RESULT = "./predict.txt"
 MOCK_QUERY_DOC_COUNT = 4

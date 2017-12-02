@@ -48,9 +48,11 @@ def generate_labeled_data_file(fout, query_count = 100, query_doc_count = config
 def parse_labeled_data_file(fin):
     '''
     Read labefinled data from file (in standard svmlight format)
-    @retuen dict[qid]feature_vec
+    @retuen dict[qid]feature_vec, list[qid]
     '''
     data = {}
+    keys = []
+    last_key = ""
     for line in fin:
         line = line.split("#")[0]
         elems = line.split(" ")
@@ -67,8 +69,11 @@ def parse_labeled_data_file(fin):
             data[qid].append([label] + feature_v)
         else:
             data[qid] = [[label] + feature_v]
+        if last_key != qid:
+            last_key = qid
+            keys.append(qid)
 
-    return data
+    return data, keys
 
 def calc_query_doc_pairwise_data(doc_list):
     '''
@@ -124,7 +129,7 @@ if __name__ == "__main__":
     generate_labeled_data_file(fin, 3)
     fin.close()
     fout = open(config.TRAIN_DATA, "r")
-    data = parse_labeled_data_file(fout)
+    data, data_keys = parse_labeled_data_file(fout)
     fout.close()
     print "--- parsed pointwise data ---"
     print data
