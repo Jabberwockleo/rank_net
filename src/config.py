@@ -12,14 +12,18 @@ Author: Wan Li
 Date: 2017/11/27 10:41:01
 """
 
-USE_HIDDEN_LAYER = True
-USE_TOY_DATA = True
+USE_HIDDEN_LAYER = False
+USE_TOY_DATA = False
 LAYER_WIDTH = 10
-FEATURE_NUM = 5
-LEARNING_RATE = 0.01
-TRAIN_BATCH_SIZE = 20
+FEATURE_NUM = 6
+LEARNING_RATE = 0.001
+TRAIN_BATCH_SIZE = 30
 MODEL_PATH = "./model_ranknet.ckpt"
-TRAIN_DATA = "./train.data"
-TEST_DATA = "./test.data"
-PREDICT_RESULT = "./predict.txt"
+TRAIN_DATA = "./labeled.train"
+TEST_DATA = "./labeled.test"
+PREDICT_RESULT = "./labeled.predict"
+if USE_TOY_DATA == True:
+    TRAIN_DATA = "./toy.train"
+    TEST_DATA = "./toy.test"
+    PREDICT_RESULT = "./toy.predict"
 MOCK_QUERY_DOC_COUNT = 4

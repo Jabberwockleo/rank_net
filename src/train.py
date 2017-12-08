@@ -60,6 +60,8 @@ with tf.Session() as sess:
             O12 = sess.run(rn.O12, feed_dict={rn.X1:X[0], rn.X2:X[1], rn.O1:Y[0], rn.O2:Y[1]})
             sign_t = np.sign(o12 * O12)
             falsepositive_count = (sign_t.shape[0] - np.sum(sign_t)) / 2
+	    print "-- epoch[%d]" % (epoch)
+	    print "* sign_t.shape[0] is [%f], np.sum(sign_t) is [%f]" % (sign_t.shape[0], np.sum(sign_t))
             print "-- epoch[%d] loss_v[%f] pairwise precision [%d/%d = %f] -- "%(
                 epoch,
                 l_v,

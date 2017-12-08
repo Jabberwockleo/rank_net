@@ -59,10 +59,17 @@ with tf.name_scope("loss"):
     O12 = O1 - O2
     o12 = o1 - o2
 
-    pred = 1/(1 + tf.exp(-o12))
-    truth = 1/(1 + tf.exp(-O12))
+    #Numerical TRICK:
+    #  log(1 + exp(-x)) = log(1 + exp(x)) - x
+    #  i.e. 1 + exp(-x) = exp(log(1 + exp(-|x|)) - min(0, x))
 
-    cross_entropy = -truth * tf.log(pred) - (1-truth) * tf.log(1-pred)
+    #pred = 1/(1 + tf.exp(-o12)) #maybe numerical overflow
+    pred = 1/tf.exp(-tf.minimum(o12, 0) + tf.log(1 + tf.exp(-tf.abs(o12)))) #reformulation
+
+    #truth = 1/(1 + tf.exp(-O12)) #maybe numerical overflow
+    truth = 1/tf.exp(-tf.minimum(O12, 0) + tf.log(1 + tf.exp(-tf.abs(O12)))) #reformulation
+
+    cross_entropy = -truth * tf.log(tf.clip_by_value(pred,1e-8,1.0)) - (1-truth) * tf.log(tf.clip_by_value(1 - pred,1e-8,1.0))
     reduce_sum = tf.reduce_sum(cross_entropy, 1)
     loss = tf.reduce_mean(reduce_sum)
 

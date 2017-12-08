@@ -54,12 +54,13 @@ def parse_labeled_data_file(fin):
     keys = []
     last_key = ""
     for line in fin:
+        line = line.encode("utf8")
         line = line.split("#")[0]
         elems = line.split(" ")
         label = float(elems[0])
         qid = elems[1].split(":")[1]
         feature_v = [0.0] * config.FEATURE_NUM
-        for i in xrange(2, len(elems)):
+        for i in xrange(2, config.FEATURE_NUM + 2):
             subelems = elems[i].split(":")
             if len(subelems) < 2:
                 continue
@@ -125,9 +126,10 @@ def get_train_data(batch_size = 100):
 
 if __name__ == "__main__":
     print "=== Unit Test ==="
-    fin = open(config.TRAIN_DATA, "w")
-    generate_labeled_data_file(fin, 3)
-    fin.close()
+    if config.USE_TOY_DATA == True:
+        fin = open(config.TRAIN_DATA, "w")
+        generate_labeled_data_file(fin, 3)
+        fin.close()
     fout = open(config.TRAIN_DATA, "r")
     data, data_keys = parse_labeled_data_file(fout)
     fout.close()
