@@ -12,11 +12,11 @@ Author: Wan Li
 Date: 2017/11/27 10:41:01
 """
 
-USE_HIDDEN_LAYER = False
-USE_TOY_DATA = False
+USE_HIDDEN_LAYER = True
+USE_TOY_DATA = True
 LAYER_WIDTH = 10
 FEATURE_NUM = 6
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.01
 TRAIN_BATCH_SIZE = 30
 MODEL_PATH = "./model_ranknet.ckpt"
 TRAIN_DATA = "./labeled.train"

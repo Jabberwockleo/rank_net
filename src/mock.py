@@ -12,6 +12,7 @@ Author: Wan Li
 Date: 2017/11/27 10:41:01
 """
 
+import math
 import random
 import numpy as np
 import config
@@ -21,7 +22,8 @@ def ground_truth_score(feature_vec):
     Calc score by mocked target weight
     '''
     score = 0.0
-    score += feature_vec[0] * 9
+    score += feature_vec[0] * 15
+    score += math.pow(feature_vec[1] * 10, 2)
     for i in xrange(len(feature_vec)):
         score += feature_vec[i]
     return score
