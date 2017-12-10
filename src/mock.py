@@ -20,6 +20,8 @@ import config
 def ground_truth_score(feature_vec):
     '''
     Calc score by mocked target weight
+    @param feature_vec array: feature vector of a query-doc
+    @return float: score of this retrieval
     '''
     score = 0.0
     score += feature_vec[0] * 15
@@ -28,23 +30,89 @@ def ground_truth_score(feature_vec):
         score += feature_vec[i]
     return score
 
+def labels_for_nonlinear_samples(qd_vec):
+    '''
+    Calc labels for query-docs
+    @param qd_vec array: array of query-doc feature vectors
+    @return array: corresponding labels. 1 for top1, -1 for others
+    '''
+    # sort
+    def pairwise_cmp(x, y):
+        a = x
+        b = y
+        if min(x[0], y[0]) == x[0]:
+            a = y
+            b = x
+        coef = 1 if np.array_equal(a, x) else -1
+        if a[0] == b[0]:
+            return coef * cmp(a[1], b[1])
+        elif a[0] == 1.0 or b[0] == 0:
+            return coef * 1
+        elif a[0] - b[0] <= 0.2:
+            # (a[0], b[0]) = (0.7, 0.5), (0.5, 0.3)
+            if b[1] - a[1] >= 0.5:
+                # (a[1], b[1]) = (0.1, 0.6)
+                # not (a[1], b[1]) = (0.6, 1.0)
+                return coef * -1
+            else:
+                return coef * 1
+        elif a[1] == 0 and b[1] >= 0.6:
+            return coef * -1
+        else:
+            return coef * 1
+        pass
+    sorted_qd_vec = sorted(qd_vec, cmp=pairwise_cmp ,reverse=True)
+    label_vec = []
+    for qd in qd_vec:
+        if np.array_equal(qd, sorted_qd_vec[0]):
+            label_vec.append(1)
+        else:
+            label_vec.append(-1)
+    pass
+    return label_vec
+
 def generate_labeled_data_file(fout, query_count = 100, query_doc_count = config.MOCK_QUERY_DOC_COUNT):
     '''
     Generate mocked data and write to svmlight format file
     '''
     for i in xrange(query_count):
-        for j in xrange(query_doc_count):
-            qid = "Q" + str(i)
-            f_vec = np.random.random_sample(config.FEATURE_NUM).round(2)
-            label = ground_truth_score(f_vec)
+        if config.USE_HIDDEN_LAYER == False:
+            # generate linear sample
+            for j in xrange(query_doc_count):
+                qid = str(i)
+                f_vec = np.random.random_sample(config.FEATURE_NUM).round(2)
+                label = ground_truth_score(f_vec)
+
+                # FORMAT: label qid:xx 1:x 2:y ..
+                rep_str = "" + str(label) + " " + "qid:" + qid
+                for k in xrange(len(f_vec)):
+                    rep_str += " " + str(k + 1) + ":"
+                    rep_str += str(f_vec[k])
+                fout.write("%s\n" % (rep_str))
+            pass
+        else:
+            # generate nonlinear sample
+            f_arr = []
+            for j in xrange(query_doc_count):
+                f_vec = np.random.random_sample(config.FEATURE_NUM).round(2)
+                if f_vec[0] < 0.3:
+                    if np.random.random() < 0.5:
+                        f_vec[0] = 0
+                if f_vec[1] > 0.6:
+                    if np.random.random() > 0.5:
+                        f_vec[1] = 1.0
+                f_arr.append(f_vec)
+
+            l_arr = labels_for_nonlinear_samples(f_arr)
 
             # FORMAT: label qid:xx 1:x 2:y ..
-            rep_str = "" + str(label) + " " + "qid:" + qid
-            for k in xrange(len(f_vec)):
-                rep_str += " " + str(k + 1) + ":"
-                rep_str += str(f_vec[k])
-            fout.write("%s\n" % (rep_str))
-        pass
+            for j in xrange(len(f_arr)):
+                rep_str = "" + str(l_arr[j]) + " " + "qid:" + str(i)
+                f_vec = f_arr[j]
+                for k in xrange(len(f_vec)):
+                    rep_str += " " + str(k + 1) + ":"
+                    rep_str += str(f_vec[k])
+                fout.write("%s\n" % (rep_str))
     pass
 
 def parse_labeled_data_file(fin):
@@ -130,14 +198,14 @@ if __name__ == "__main__":
     print "=== Unit Test ==="
     if config.USE_TOY_DATA == True:
         fin = open(config.TRAIN_DATA, "w")
-        generate_labeled_data_file(fin, 3)
+        generate_labeled_data_file(fin, 100)
         fin.close()
-    fout = open(config.TRAIN_DATA, "r")
-    data, data_keys = parse_labeled_data_file(fout)
-    fout.close()
-    print "--- parsed pointwise data ---"
-    print data
-    print "--- parsed pairwise data ---"
-    for k, v in data.iteritems():
-        print "pairs for key [%s]:" % (k)
-        print calc_query_doc_pairwise_data(v)
+    #fout = open(config.TRAIN_DATA, "r")
+    #data, data_keys = parse_labeled_data_file(fout)
+    #fout.close()
+    #print "--- parsed pointwise data ---"
+    #print data
+    #print "--- parsed pairwise data ---"
+    #for k, v in data.iteritems():
+    #    print "pairs for key [%s]:" % (k)
+    #    print calc_query_doc_pairwise_data(v)

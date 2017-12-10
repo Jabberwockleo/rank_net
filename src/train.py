@@ -20,7 +20,7 @@ import config
 
 if config.USE_TOY_DATA == True:
     fin = open(config.TRAIN_DATA, "w")
-    mock.generate_labeled_data_file(fin, 500)
+    mock.generate_labeled_data_file(fin, 10000)
     fin.close()
 
 fout = open(config.TRAIN_DATA, "r")
@@ -42,7 +42,7 @@ with tf.Session() as sess:
     sess.run(init)
 
     query_doc_index = 0
-    for epoch in range(0,5000):
+    for epoch in range(0, 10000):
         X, Y = [[],[]], [[], []]
         for _ in xrange(config.TRAIN_BATCH_SIZE):
             query_doc_index += 1
