@@ -17,12 +17,18 @@ import random
 import numpy as np
 import config
 
+
 def ground_truth_score(feature_vec):
-    '''
-    Calc score by mocked target weight
-    @param feature_vec array: feature vector of a query-doc
-    @return float: score of this retrieval
-    '''
+    """Calc score by mocked target weight
+
+    This function is used in linear model data generataion
+
+    Args:
+        feature_vec array: feature vector of a query-doc
+
+    Returns:
+        float: score of this retrieval
+    """
     score = 0.0
     score += feature_vec[0] * 15
     score += math.pow(feature_vec[1] * 10, 2)
@@ -30,14 +36,28 @@ def ground_truth_score(feature_vec):
         score += feature_vec[i]
     return score
 
+
 def labels_for_nonlinear_samples(qd_vec):
-    '''
-    Calc labels for query-docs
-    @param qd_vec array: array of query-doc feature vectors
-    @return array: corresponding labels. 1 for top1, -1 for others
-    '''
+    """Calc labels for query-docs
+
+    This function is used for non-linear model with hidden layers
+
+    Args:
+        qd_vec array: array of query-doc feature vectors
+
+    Returns:
+        array: corresponding labels. 1 for top1, -1 for others
+    """
     # sort
     def pairwise_cmp(x, y):
+        """Pairwise comparison function
+
+        Args:
+            x, y: arguments to be compared
+
+        Returns:
+            The return value is negative if x < y, zero if x == y and strictly positive if x > y.
+        """
         a = x
         b = y
         if min(x[0], y[0]) == x[0]:
@@ -61,7 +81,7 @@ def labels_for_nonlinear_samples(qd_vec):
         else:
             return coef * 1
         pass
-    sorted_qd_vec = sorted(qd_vec, cmp=pairwise_cmp ,reverse=True)
+    sorted_qd_vec = sorted(qd_vec, cmp=pairwise_cmp, reverse=True)
     label_vec = []
     for qd in qd_vec:
         if np.array_equal(qd, sorted_qd_vec[0]):
@@ -71,10 +91,18 @@ def labels_for_nonlinear_samples(qd_vec):
     pass
     return label_vec
 
-def generate_labeled_data_file(fout, query_count = 100, query_doc_count = config.MOCK_QUERY_DOC_COUNT):
-    '''
-    Generate mocked data and write to svmlight format file
-    '''
+
+def generate_labeled_data_file(fout, query_count=100,
+    query_doc_count=config.MOCK_QUERY_DOC_COUNT):
+    """Generate mocked data
+    
+    Generated data is writen in svmlight format file
+
+    Args:
+        fout: file output
+        query_count: the number of total queries to mock
+        query_doc_count: the number of docs in each retrieval 
+    """
     for i in xrange(query_count):
         if config.USE_HIDDEN_LAYER == False:
             # generate linear sample
@@ -115,11 +143,15 @@ def generate_labeled_data_file(fout, query_count = 100, query_doc_count = config
                 fout.write("%s\n" % (rep_str))
     pass
 
+
 def parse_labeled_data_file(fin):
-    '''
-    Read labefinled data from file (in standard svmlight format)
-    @retuen dict[qid]feature_vec, list[qid]
-    '''
+    """Read labefinled data from file
+
+    File is assumed as organized in standard svmlight
+    
+    Returns:
+        tuple: (map[qid]feature_vec, list[qid])
+    """
     data = {}
     keys = []
     last_key = ""
@@ -146,17 +178,21 @@ def parse_labeled_data_file(fin):
 
     return data, keys
 
+
 def calc_query_doc_pairwise_data(doc_list):
-    '''
-    Calc required sample pairs from one retrival
-    e.g. if doc_list contains A, B, C and A > B > C
+    """Calc required sample pairs from one retrival
+
+    If doc_list contains A, B, C and A > B > C
          pairs are generated as A > B, A > C, B > C
-    @param doc_list
-        list of list of: [score, f1, f2 , ..., fn]
-    @return [X1, X2], [Y1, Y2]
+
+    Args:
+        doc_list: list of list: [score, f1, f2 , ..., fn]
+
+    Returns:
+        [X1, X2], [Y1, Y2]:
         X1.shape = X2.shape = (None, config.FEATURE_NUM)
         Y1.shape = Y2.shape = (None, 1)
-    '''
+    """
     X1 = []
     X2 = []
     Y1 = []
@@ -170,42 +206,18 @@ def calc_query_doc_pairwise_data(doc_list):
             Y2.append(sorted_doc_list[j][0:1])
     return [X1, X2], [Y1, Y2]
 
-def get_train_data(batch_size = 100):
-    X1, X2 = [],[]
-    Y1, Y2 = [],[]
-    for i in range(0, batch_size):
-        x1 = []
-        x2 = []
-        o1 = 0.0
-        o2 = 0.0
-        for j in range(0, config.FEATURE_NUM):
-            r1 = random.random()
-            r2 = random.random()
-            x1.append(r1)
-            x2.append(r2)
-            mu = 10.0
-            if j >= 1 : mu = 1.0
-            o1 += r1 * mu
-            o2 += r2 * mu
-        X1.append(x1)
-        Y1.append([o1])
-        X2.append(x2)
-        Y2.append([o2])
-
-    return  ((np.array(X1), np.array(X2)), (np.array(Y1), np.array(Y2)))
-
 if __name__ == "__main__":
     print "=== Unit Test ==="
     if config.USE_TOY_DATA == True:
         fin = open(config.TRAIN_DATA, "w")
         generate_labeled_data_file(fin, 100)
         fin.close()
-    #fout = open(config.TRAIN_DATA, "r")
-    #data, data_keys = parse_labeled_data_file(fout)
-    #fout.close()
-    #print "--- parsed pointwise data ---"
-    #print data
-    #print "--- parsed pairwise data ---"
-    #for k, v in data.iteritems():
-    #    print "pairs for key [%s]:" % (k)
-    #    print calc_query_doc_pairwise_data(v)
+    fout = open(config.TRAIN_DATA, "r")
+    data, data_keys = parse_labeled_data_file(fout)
+    fout.close()
+    print "--- parsed pointwise data ---"
+    print data
+    print "--- parsed pairwise data ---"
+    for k, v in data.iteritems():
+        print "pairs for key [%s]:" % (k)
+        print calc_query_doc_pairwise_data(v)

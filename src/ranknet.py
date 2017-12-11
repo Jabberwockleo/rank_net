@@ -16,7 +16,8 @@ import tensorflow as tf
 import config
 
 weights = {
-        "hidden": tf.Variable(tf.random_normal([config.FEATURE_NUM, config.LAYER_WIDTH]), name="W_hidden"),
+        "hidden": tf.Variable(tf.random_normal(
+            [config.FEATURE_NUM, config.LAYER_WIDTH]), name="W_hidden"),
         "out": tf.Variable(tf.random_normal([config.LAYER_WIDTH, 1]), name="W_out"),
         "linear": tf.Variable(tf.random_normal([config.FEATURE_NUM, 1]), name="W_linear")
 }
@@ -63,13 +64,14 @@ with tf.name_scope("loss"):
     #  log(1 + exp(-x)) = log(1 + exp(x)) - x
     #  i.e. 1 + exp(-x) = exp(log(1 + exp(-|x|)) - min(0, x))
 
-    #pred = 1/(1 + tf.exp(-o12)) #maybe numerical overflow
-    pred = 1/tf.exp(-tf.minimum(o12, 0) + tf.log(1 + tf.exp(-tf.abs(o12)))) #reformulation
+    #pred = 1 / (1 + tf.exp(-o12)) #maybe numerical overflow
+    pred = 1 / tf.exp(-tf.minimum(o12, 0) + tf.log(1 + tf.exp(-tf.abs(o12)))) #reformulation
 
-    #truth = 1/(1 + tf.exp(-O12)) #maybe numerical overflow
-    truth = 1/tf.exp(-tf.minimum(O12, 0) + tf.log(1 + tf.exp(-tf.abs(O12)))) #reformulation
+    #truth = 1 / (1 + tf.exp(-O12)) #maybe numerical overflow
+    truth = 1 / tf.exp(-tf.minimum(O12, 0) + tf.log(1 + tf.exp(-tf.abs(O12)))) #reformulation
 
-    cross_entropy = -truth * tf.log(tf.clip_by_value(pred,1e-8,1.0)) - (1-truth) * tf.log(tf.clip_by_value(1 - pred,1e-8,1.0))
+    cross_entropy = -truth * tf.log(tf.clip_by_value(pred, 1e-8, 1.0))
+    - (1 - truth) * tf.log(tf.clip_by_value(1 - pred, 1e-8, 1.0))
     reduce_sum = tf.reduce_sum(cross_entropy, 1)
     loss = tf.reduce_mean(reduce_sum)
 
