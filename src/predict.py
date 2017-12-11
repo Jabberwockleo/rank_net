@@ -79,7 +79,7 @@ with tf.Session() as sess:
                 result_label = "falsepositive"
                 falsepositive_rank_count += 1
             for i in xrange(o.shape[0]):
-                fpred.write("%s\t%.2f\t%.2f\n" % (result_label, o[i], O[i]))
+                fpred.write("%s\t%.2f\t%.2f\t%s\n" % (result_label, o[i], O[i], qid))
 
     print "-- pairwise precision [%d/%d = %f] -- " % (
             total_pairs_count - falsepositive_pairs_count,
